@@ -122,6 +122,7 @@ defmodule RPLidar do
         pin ->
           {:ok, gpio} = Circuits.GPIO.open(pin, :output)
           :ok = Circuits.GPIO.write(gpio, 0)
+          gpio
       end
 
     device = Keyword.get(opts, :uart_device, "ttyS0")
@@ -202,9 +203,9 @@ defmodule RPLidar do
     {:noreply, %{state | buffer: buffer}}
   end
 
-  defp process_scan(nil, _, _), do: :ok
-  defp process_scan({_, 0.0, _}, _, true), do: :ok
-  defp process_scan({_, _, 0}, _, true), do: :ok
+  defp process_scan(nil, _, _, _), do: :ok
+  defp process_scan({_, 0.0, _}, _, true, _), do: :ok
+  defp process_scan({_, _, 0}, _, true, _), do: :ok
 
   defp process_scan({angle, distance, quality}, parent, _, time) do
     send(parent, {:lidar_packet, angle, distance, quality, time})
